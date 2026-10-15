@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Mobile dashboard prototype for a risk-controlled Kalshi crypto trading bot.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Crypto Bot Console</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1220; --panel:#121d2e; --panel2:#172438; --line:#26364c; --text:#edf3fb; --muted:#91a2b8; --green:#54d6a0; --amber:#f6c66b; --red:#ff7f86; --blue:#83b8ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif; }
+    button,input { font:inherit; }
+    .app { max-width:900px; margin:0 auto; padding:env(safe-area-inset-top) 16px calc(28px + env(safe-area-inset-bottom)); }
+    header { display:flex; justify-content:space-between; align-items:center; padding:22px 0 18px; gap:12px; }
+    .brand { display:flex; align-items:center; gap:11px; }
+    .logo { width:42px; height:42px; border-radius:13px; background:#1b3551; display:grid; place-items:center; color:var(--green); font-weight:900; font-size:20px; }
+    h1 { font-size:20px; margin:0; letter-spacing:-.4px; }
+    .sub { color:var(--muted); font-size:12px; margin-top:3px; }
+    .pill { border:1px solid #725a2b; color:var(--amber); background:#332919; border-radius:999px; padding:6px 10px; font-size:11px; font-weight:800; white-space:nowrap; }
+    .banner { border:1px solid #6d542a; background:#2b2418; color:#f7dca6; padding:12px 14px; border-radius:14px; font-size:13px; margin-bottom:16px; }
+    .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+    button { border:0; border-radius:12px; padding:13px 14px; font-weight:800; cursor:pointer; }
+    .primary { background:var(--green); color:#062116; }
+    .secondary { background:var(--panel2); border:1px solid var(--line); color:var(--text); }
+    .danger { background:#3a202a; border:1px solid #743642; color:#ffb3b8; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; min-width:0; }
+    .label { color:var(--muted); font-size:12px; }
+    .value { font-size:25px; font-weight:850; margin-top:5px; letter-spacing:-.5px; }
+    .small { font-size:12px; color:var(--muted); margin-top:4px; }
+    .section { margin:22px 0 10px; display:flex; justify-content:space-between; align-items:center; }
+    h2 { font-size:16px; margin:0; }
+    .tag { font-size:11px; border-radius:7px; padding:4px 7px; background:#1a3043; color:var(--blue); }
+    .row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+    .row:last-child { border-bottom:0; padding-bottom:0; }
+    .asset { display:flex; align-items:center; gap:10px; min-width:0; }
+    .coin { display:grid; place-items:center; width:34px; height:34px; border-radius:11px; background:#22334a; font-weight:900; }
+    .asset-name { font-weight:750; }
+    .muted { color:var(--muted); font-size:12px; }
+    .right { text-align:right; }
+    .green { color:var(--green); }
+    .amber { color:var(--amber); }
+    .red { color:var(--red); }
+    .risk-list { display:grid; gap:13px; margin-top:12px; }
+    .risk-row { display:flex; justify-content:space-between; gap:12px; }
+    .risk-row span:first-child { color:var(--muted); }
+    .statusline { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--amber); }
+    footer { color:var(--muted); font-size:11px; text-align:center; padding:22px 6px 0; }
+    @media(min-width:650px) { .grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .controls { grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:380px) { .app { padding-left:12px; padding-right:12px; } .value { font-size:22px; } .pill { font-size:10px; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">K</div>
+        <div><h1>Crypto Bot Console</h1><div class="sub">Mobile trading dashboard · Stage 1</div></div>
+      </div>
+      <span class="pill" id="modePill">PAPER MODE</span>
+    </header>
+
+    <div class="banner"><strong>Prototype only.</strong> Values below are illustrative sample data. No Kalshi account is connected and no orders can be placed. Live trading is disabled.</div>
+
+    <div class="statusline"><span class="dot" id="statusDot"></span><span id="botStatus">Scanner paused · Demo data only</span></div>
+    <div class="controls">
+      <button class="primary" id="startBtn">Start scanner</button>
+      <button class="secondary" id="pauseBtn">Pause scanner</button>
+      <button class="danger" id="stopBtn">Emergency stop</button>
+    </div>
+
+    <div class="grid">
+      <section class="card"><div class="label">Paper balance</div><div class="value">$100.00</div><div class="small">Illustrative starting budget</div></section>
+      <section class="card"><div class="label">Available capital</div><div class="value">$100.00</div><div class="small">No open positions</div></section>
+      <section class="card"><div class="label">Realized P&amp;L</div><div class="value">$0.00</div><div class="small">Fees included: $0.00</div></section>
+      <section class="card"><div class="label">Open exposure</div><div class="value">$0.00</div><div class="small">Risk limit: 25% of budget</div></section>
+    </div>
+
+    <div class="section"><h2>Market watch</h2><span class="tag">SAMPLE ONLY</span></div>
+    <section class="card">
+      <div class="row"><div class="asset"><div class="coin">₿</div><div><div class="asset-name">Bitcoin (BTC)</div><div class="muted">Example market · not live</div></div></div><div class="right"><div>$—</div><div class="muted">No quote connected</div></div></div>
+      <div class="row"><div class="asset"><div class="coin">Ξ</div><div><div class="asset-name">Ethereum (ETH)</div><div class="muted">Example market · not live</div></div></div><div class="right"><div>$—</div><div class="muted">No quote connected</div></div></div>
+      <div class="row"><div class="asset"><div class="coin">◎</div><div><div class="asset-name">Solana (SOL)</div><div class="muted">Example market · not live</div></div></div><div class="right"><div>$—</div><div class="muted">No quote connected</div></div></div>
+    </section>
+
+    <div class="section"><h2>Risk guardrails</h2><span class="tag">PRESET</span></div>
+    <section class="card risk-list">
+      <div class="risk-row"><span>Capital budget</span><strong>$100</strong></div>
+      <div class="risk-row"><span>Maximum risk per trade</span><strong>1% ($1)</strong></div>
+      <div class="risk-row"><span>Maximum total exposure</span><strong>25% ($25)</strong></div>
+      <div class="risk-row"><span>Maximum single-crypto exposure</span><strong>10% ($10)</strong></div>
+      <div class="risk-row"><span>Maximum new positions/day</span><strong>5</strong></div>
+      <div class="risk-row"><span>Daily realized loss stop</span><strong class="red">3% ($3)</strong></div>
+      <div class="risk-row"><span>Weekly realized loss stop</span><strong class="red">5% ($5)</strong></div>
+      <div class="muted">Limits are displayed for review only and are not enforced by a trading engine in this prototype.</div>
+    </section>
+
+    <div class="section"><h2>Activity</h2><span class="tag">LOCAL DEMO</span></div>
+    <section class="card">
+      <div class="row"><div><div class="asset-name">Dashboard loaded</div><div class="muted">No API credentials or exchange connection</div></div><div class="muted">Just now</div></div>
+      <div class="row"><div><div class="asset-name">Order execution</div><div class="muted">Disabled by design</div></div><div class="amber">OFF</div></div>
+    </section>
+
+    <footer>Safety-first build · No financial returns are guaranteed. Before live trading: verify official API docs, test in demo/paper mode, and explicitly authorize any live mode.</footer>
+  </main>
+  <script>
+    const status = document.getElementById('botStatus');
+    const dot = document.getElementById('statusDot');
+    document.getElementById('startBtn').addEventListener('click', () => {
+      status.textContent = 'Scanner preview started · sample data only';
+      dot.style.background = 'var(--green)';
+    });
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      status.textContent = 'Scanner paused · Demo data only';
+      dot.style.background = 'var(--amber)';
+    });
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      status.textContent = 'Emergency stop engaged · no orders can be placed';
+      dot.style.background = 'var(--red)';
+      alert('Emergency stop preview activated. This prototype has no trading connection.');
+    });
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>
